@@ -365,7 +365,7 @@ Os repositórios são mockados; o service roda sem banco real.
 |------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | `V1__initial_schema.sql`           | 4 tabelas (usuarios/clientes/veiculos/leads), índices compostos `(prioridade, status)`, CHECK nos enums          |
 | `V2__security_hardening.sql`       | Tabelas `audit_logs` + `login_attempts`; muda `clientes.email/telefone` para TEXT (ciphertext AES-GCM); coluna `retencao_ate` |
-| `V3__seed_real_data.sql`           | 300 clientes + 300 veículos + 93 leads da planilha Ford. Email/telefone JÁ criptografados pelo `build_seed.py`.   |
+| `V3__seed_real_data.sql`           | 300 clientes + 300 veículos + 93 leads gerados a partir da planilha Ford pelo time IA/ML. Email/telefone JÁ criptografados em AES-256-GCM (formato compatível com o `EncryptedStringConverter` do backend). |
 
 Flyway aplica automaticamente no boot. Para criar uma nova migração, basta adicionar `V3__descricao.sql` em `src/main/resources/db/migration/`.
 
@@ -385,17 +385,25 @@ O seed (`V3`) usa **dados D0 reais** da planilha oficial Ford (`Downloads/Ford/v
 
 Distribuição resultante: ~39% Fiel, ~30% Econômico, ~17% Esquecido, ~14% Abandono → **93 leads** gerados automaticamente (Abandono + Esquecido) com prioridades distribuídas entre Crítica/Alta/Média.
 
-Para regenerar o seed (precisa de `openpyxl` + `cryptography`):
+### Regenerar o seed
+
+O script gerador (`build_seed.py`) vive no repositório **IA/ML** (`challenge-IAML`) porque é um pipeline de preparação de dados — Python, sklearn, criptografia AES.
+
+Para gerar uma nova versão do `V3__seed_real_data.sql`:
+
+1. Clone também o repo IA/ML: `git clone https://github.com/Lynnbrosa/challenge-IAML.git`
+2. Siga o README de lá pra obter a planilha Ford e rodar `python scripts/build_seed.py`.
+3. Aponte o output diretamente para esta pasta de migrations:
 
 ```bash
-pip install openpyxl cryptography
-APP_CRYPTO_KEY=$(openssl rand -base64 32) python scripts/build_seed.py <caminho-do-xlsx> [n_amostras]
-# ex.:
-# APP_CRYPTO_KEY=cHJldmlvcGxzLWRldi1rZXktMzItYnl0ZXMtWFhYWFg= python scripts/build_seed.py \
-#   "C:\Users\User\Downloads\Ford\vin_share_Desafio_02.xlsx" 300
+APP_CRYPTO_KEY=<mesma-do-backend> \
+  python scripts/build_seed.py \
+    data/vin_share_Desafio_02.xlsx \
+    300 \
+    ../challenge-SOA/src/main/resources/db/migration/V3__seed_real_data.sql
 ```
 
-O script lê a planilha, deduplica por `VIN_Hash`, amostra `n` veículos uniformemente, gera PII sintética, **criptografa email/telefone com a mesma AES-GCM do backend** e classifica via a mesma lógica do `MlService` — produzindo `V3__seed_real_data.sql` pronto pro Flyway. A `APP_CRYPTO_KEY` usada na geração precisa ser **a mesma** que o backend vai consumir, senão a decriptação falha ao ler os clientes.
+A `APP_CRYPTO_KEY` usada na geração precisa ser **a mesma** que o backend Java vai consumir — senão a decriptação Fernet falha ao ler os clientes.
 
 ## Rubrica × entregas
 
