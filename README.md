@@ -416,3 +416,9 @@ A `APP_CRYPTO_KEY` usada na geração precisa ser **a mesma** que o backend Java
 | SOA — camadas (20%)                             | `controller → service → repository → entity`; teste Mockito comprova desacoplamento |
 | REST + JSON + erros sem stack (15%)             | `GlobalExceptionHandler` + `server.error.include-stacktrace=never`        |
 | JPA + migrações (15%)                           | `entity/*` (Hibernate) + `migration/V1__initial_schema.sql` (Flyway)      |
+
+## Repositórios irmãos da challenge
+
+- [`challenge-Mobile`](https://github.com/Lynnbrosa/challenge-Mobile) — app React Native do consultor (consome esta API)
+- [`challenge-IAML`](https://github.com/Lynnbrosa/challenge-IAML) — notebook IA/ML + gerador do seed (`V3__seed_real_data.sql` deste repo)
+- [`challenge-Cyber`](https://github.com/Lynnbrosa/challenge-Cyber) — controles paralelos de Cybersecurity / LGPD em Python (Fernet, audit, HMAC, TLS)
