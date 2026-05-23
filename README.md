@@ -1,3 +1,9 @@
+Nomes e RMs,
+Giovanne Charelli Zaniboni Silva | 556223 
+Leonardo Pasquini Baldaia | 557416 
+Gustavo Oliveira de Moura | 555827 
+Lynn Bueno Rosa | 551102
+
 # PrevioPLS — Ford Predict & Care (Backend)
 
 Plataforma preditiva de retenção pós-venda Ford. Backend SOA em **Java 21 + Spring Boot 3 + Spring Data JPA + PostgreSQL + Flyway**.
